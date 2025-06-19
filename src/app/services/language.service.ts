@@ -62,6 +62,7 @@ export class LanguageService {
       'download.again': 'Pobierz ponownie',
       'remove.from.history': 'Usuń z historii',
       'clear.history': 'Wyczyść historię',
+      'qr.clear': 'Wyczyść',
 
       // Copy & shortcuts
       'copy.image': 'Kopiuj obraz',
@@ -90,6 +91,7 @@ export class LanguageService {
       'style.logo': 'Style & Logo',
       'colors': 'Colors',
       'export': 'Export',
+      'qr.clear': 'Clear',
 
       // Colors
       'color.code': 'Code color',
