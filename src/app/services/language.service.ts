@@ -41,6 +41,7 @@ export class LanguageService {
       'download': 'Pobierz',
       'generate.qr': 'Generuj QR',
       'generating': 'Generowanie...',
+      'file format': 'Format pliku:',
 
       // Scanner
       'qr.scanner': 'Skaner QR',
@@ -106,6 +107,7 @@ export class LanguageService {
       'download': 'Download',
       'generate.qr': 'Generate QR',
       'generating': 'Generating...',
+      'file format': 'File format:',
 
       // Scanner
       'qr.scanner': 'QR Scanner',
