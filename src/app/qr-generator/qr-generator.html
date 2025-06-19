@@ -1,0 +1,454 @@
+<div [class]="isDarkMode ? 'dark' : ''" class="min-h-screen transition-all duration-300">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 pb-20">
+    <div class="container mx-auto px-4 py-8">
+
+      <!-- Dark Mode Toggle -->
+      <div class="flex justify-end mb-6">
+        <button
+          (click)="toggleDarkMode()"
+          class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl p-3 hover:shadow-md transition-all duration-300 group">
+          <span class="text-xl group-hover:scale-110 transition-transform duration-300">{{isDarkMode ? '☀️' : '🌙'}}</span>
+        </button>
+      </div>
+
+      <!-- QR Code Preview Section -->
+      <div class="flex justify-center mb-8">
+        <div class="relative">
+          <div *ngIf="isGenerating" class="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 rounded-xl z-10">
+            <div class="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+          </div>
+
+          <!-- QR Container -->
+          <div
+            #qrContainer
+            data-qr-container
+            [style.width.px]="qrSize"
+            [style.height.px]="qrSize"
+            class="rounded-xl shadow-md transition-all duration-500 hover:shadow-lg flex items-center justify-center bg-white dark:bg-gray-800">
+          </div>
+        </div>
+      </div>
+
+      <!-- V4 - Copy buttons PONIŻEJ QR kodu -->
+      <div class="flex justify-center gap-4 mb-8" *ngIf="qrCode">
+        <button
+          (click)="copyQRImage()"
+          class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 group flex items-center gap-2">
+          <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{{'copy.image' | translate}}</span>
+        </button>
+
+        <button
+          (click)="copyQRText()"
+          class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 group flex items-center gap-2">
+          <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">{{'copy.text' | translate}}</span>
+        </button>
+      </div>
+
+      <!-- Text Input Section z przyciskiem Clear -->
+      <div class="max-w-6xl mx-auto mb-8">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+                <span class="text-blue-600 dark:text-blue-400 text-xl">📝</span>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                {{'qr.content' | translate}}
+              </h3>
+            </div>
+            <!-- Przycisk Clear -->
+            <button
+              (click)="clearText()"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 text-sm">
+              🗑️ Wyczyść
+            </button>
+          </div>
+
+          <textarea
+            [(ngModel)]="qrText"
+            [placeholder]="'content.placeholder' | translate"
+            class="w-full px-4 py-4 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 text-input"
+            rows="3">
+          </textarea>
+        </div>
+      </div>
+
+      <!-- Readability Test -->
+      <div class="max-w-6xl mx-auto mb-4" *ngIf="readabilityTested">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50 dark:border-gray-700/50 readability-indicator">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                 [class]="isReadable ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'">
+              <span [class]="isReadable ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                {{isReadable ? '✅' : '❌'}}
+              </span>
+            </div>
+            <div>
+              <p class="font-medium text-gray-900 dark:text-white">
+                {{'readability.test' | translate}} {{isReadable ? ('code.readable' | translate) : ('code.unreadable' | translate)}}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="!isReadable">
+                {{'improve.contrast' | translate}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reorganizowany Options Grid -->
+      <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Pierwszy rząd: Rozmiar + Kolory (2 kolumny) -->
+        <div class="grid md:grid-cols-2 gap-6">
+
+          <!-- Size Control + Colors Combined -->
+          <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500 option-card"
+               [class.disabled-section]="colorsDisabled">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
+                <span class="text-orange-600 dark:text-orange-400 text-xl">📐</span>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{'size' | translate}} & {{'colors' | translate}}
+              </h3>
+            </div>
+
+            <!-- Size Control -->
+            <div class="mb-6">
+              <div class="text-center mb-4">
+                <span class="text-2xl font-mono bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-bold">{{qrSize}}px</span>
+              </div>
+
+              <input
+                type="range"
+                [(ngModel)]="qrSize"
+                min="200"
+                max="1000"
+                step="50"
+                class="w-full h-3 bg-gradient-to-r from-orange-200 to-red-200 dark:from-orange-800 dark:to-red-800 rounded-lg appearance-none cursor-pointer slider">
+            </div>
+
+            <!-- Colors Section -->
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-6">
+              <div class="space-y-4" [class.blur-sm]="colorsDisabled" [class.pointer-events-none]="colorsDisabled">
+                <!-- First color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{isGradientStyle ? ('color1.gradient' | translate) : ('color.code' | translate)}}
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-200 to-purple-200 dark:from-pink-800 dark:to-purple-800 rounded-xl blur-sm opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    <input
+                      type="color"
+                      [(ngModel)]="qrColor"
+                      [disabled]="colorsDisabled"
+                      class="relative w-full h-12 rounded-xl border-0 shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 color-input-modern disabled:cursor-not-allowed disabled:opacity-50">
+                    <div class="absolute top-1 left-1 w-10 h-10 rounded-lg shadow-inner pointer-events-none" [style.background-color]="qrColor"></div>
+                  </div>
+                </div>
+
+                <!-- Second color for gradients -->
+                <div *ngIf="isGradientStyle">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{'color2.gradient' | translate}}
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded-xl blur-sm opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    <input
+                      type="color"
+                      [(ngModel)]="qrColor2"
+                      [disabled]="colorsDisabled"
+                      class="relative w-full h-12 rounded-xl border-0 shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 color-input-modern disabled:cursor-not-allowed disabled:opacity-50">
+                    <div class="absolute top-1 left-1 w-10 h-10 rounded-lg shadow-inner pointer-events-none" [style.background-color]="qrColor2"></div>
+                  </div>
+                </div>
+
+                <!-- Background color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{'color.background' | translate}}
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-200 to-cyan-200 dark:from-blue-800 dark:to-cyan-800 rounded-xl blur-sm opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    <input
+                      type="color"
+                      [(ngModel)]="qrBackgroundColor"
+                      [disabled]="colorsDisabled"
+                      class="relative w-full h-12 rounded-xl border-0 shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 color-input-modern disabled:cursor-not-allowed disabled:opacity-50">
+                    <div class="absolute top-1 left-1 w-10 h-10 rounded-lg shadow-inner pointer-events-none" [style.background-color]="qrBackgroundColor"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Style Selection + Logo (2 kolumny) -->
+          <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500 option-card">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
+                <span class="text-purple-600 dark:text-purple-400 text-xl">🎨</span>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{'style.logo' | translate}}
+              </h3>
+            </div>
+
+            <!-- Style buttons - 2 rzędy po 4 -->
+            <div class="grid grid-cols-4 gap-3 mb-6">
+              <button
+                *ngFor="let style of qrStyles"
+                (click)="selectStyle(style.name)"
+                [class]="selectedStyle === style.name ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700 scale-105' : 'hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 hover:scale-105'"
+                class="p-3 rounded-xl border transition-all duration-300 text-center group style-button">
+                <div class="text-lg mb-1 group-hover:scale-110 transition-transform duration-300">{{style.icon}}</div>
+                <div class="text-xs font-medium text-gray-700 dark:text-gray-300 capitalize">{{style.name}}</div>
+              </button>
+            </div>
+
+            <!-- Logo Upload -->
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-6">
+              <div
+                #dropZone
+                [class]="isDragOver ? 'border-purple-400 dark:border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600'"
+                class="border-2 border-dashed rounded-lg p-4 text-center hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-300"
+                *ngIf="!logoPreview">
+                <input
+                  #logoInput
+                  type="file"
+                  accept="image/*"
+                  (change)="onLogoUpload($event)"
+                  class="hidden">
+                <button
+                  (click)="logoInput.click()"
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                  {{'add.logo' | translate}}
+                </button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{'drag.drop.click' | translate}}
+                </p>
+              </div>
+
+              <div *ngIf="logoPreview" class="text-center">
+                <img [src]="logoPreview" class="w-20 h-20 object-cover rounded-lg mx-auto mb-3 border-2 border-gray-200 dark:border-gray-600 shadow-sm">
+                <button
+                  (click)="removeLogo()"
+                  class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                  {{'remove.logo' | translate}}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drugi rząd: Export (cała szerokość) -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500 option-card">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900 rounded-xl flex items-center justify-center">
+              <span class="text-emerald-600 dark:text-emerald-400 text-xl">💾</span>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              {{'export' | translate}}
+            </h3>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-8 items-center">
+            <!-- Format Selection -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Format pliku:</h4>
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  *ngFor="let format of formats"
+                  (click)="selectedFormat = format.value"
+                  [class]="selectedFormat === format.value ? 'ring-2 ring-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 scale-105' : 'hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 hover:scale-105'"
+                  class="p-4 rounded-xl border transition-all duration-300 text-center group format-button">
+                  <div class="text-xl mb-2 group-hover:scale-110 transition-transform duration-300">{{format.icon}}</div>
+                  <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{format.label}}</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Download Section -->
+            <div class="text-center">
+              <button
+                (click)="downloadQR()"
+                class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl download-button text-lg">
+                📥 {{'download' | translate}} {{selectedFormat.toUpperCase()}}
+              </button>
+
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
+                {{'shortcut.download' | translate}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- V4 - QR Scanner Section z Drag & Drop -->
+      <div class="max-w-6xl mx-auto mt-8">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+              <span class="text-blue-600 dark:text-blue-400 text-xl">📷</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+              {{'qr.scanner' | translate}}
+            </h3>
+          </div>
+
+          <!-- Scanner Drop Zone - pełna szerokość -->
+          <div class="mb-6">
+            <div
+              #scannerDropZone
+              (dragover)="onScannerDragOver($event)"
+              (dragleave)="onScannerDragLeave($event)"
+              (drop)="onScannerDrop($event)"
+              [class]="isScannerDragOver ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'"
+              class="w-full border-2 border-dashed rounded-xl p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 cursor-pointer"
+              (click)="openScanner()">
+
+              <input
+                #scannerInput
+                type="file"
+                accept="image/*"
+                (change)="onScannerFileSelected($event)"
+                class="hidden">
+
+              <div class="flex flex-col items-center gap-4">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">📷</span>
+                </div>
+
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {{'scan.from.file' | translate}}
+                  </h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {{'scan.instruction' | translate}}
+                  </p>
+                </div>
+
+                <button
+                  [disabled]="isScanning"
+                  class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  <span *ngIf="!isScanning" class="flex items-center gap-2">
+                    <span class="text-lg">📁</span>
+                    {{'select.file' | translate}}
+                  </span>
+                  <span *ngIf="isScanning" class="flex items-center gap-2">
+                    <span class="animate-spin text-lg">⚙️</span>
+                    {{'scanning' | translate}}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results pod drop zone -->
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-4 text-lg">{{'scan.result' | translate}}</h4>
+
+            <div *ngIf="scanResult" class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 p-4 rounded-lg break-all">
+              <div class="flex items-start gap-3">
+                <span class="text-green-600 dark:text-green-400 text-xl flex-shrink-0">✅</span>
+                <div>
+                  <p class="font-medium mb-2">{{'scan.success' | translate}}</p>
+                  <p class="font-mono text-sm">{{scanResult}}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!scanResult && scanTested" class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg">
+              <div class="flex items-start gap-3">
+                <span class="text-red-600 dark:text-red-400 text-xl flex-shrink-0">❌</span>
+                <div>
+                  <p class="font-medium mb-1">{{'scan.failed' | translate}}</p>
+                  <p class="text-sm">{{'check.readable' | translate}}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!scanTested" class="bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 p-4 rounded-lg">
+              <div class="flex items-center gap-3">
+                <span class="text-gray-500 dark:text-gray-400 text-xl">📷</span>
+                <p>{{'scan.select' | translate}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- V4 - QR History Section -->
+      <div class="max-w-6xl mx-auto mt-8" *ngIf="(historyService.history$ | async)?.length">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-xl flex items-center justify-center">
+                <span class="text-indigo-600 dark:text-indigo-400 text-xl">📚</span>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                {{'qr.history' | translate}}
+              </h3>
+            </div>
+            <button
+              (click)="clearHistory()"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 text-sm">
+              {{'clear.history' | translate}}
+            </button>
+          </div>
+
+          <!-- History Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            <div
+              *ngFor="let item of (historyService.history$ | async)"
+              class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 group">
+
+              <!-- QR Preview -->
+              <div class="aspect-square mb-2 bg-white dark:bg-gray-800 rounded-lg p-2 flex items-center justify-center">
+                <img [src]="item.imageData" [alt]="item.text" class="max-w-full max-h-full object-contain">
+              </div>
+
+              <!-- Item Info -->
+              <div class="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                <div class="font-medium truncate" [title]="item.text">{{item.text}}</div>
+                <div class="text-gray-500 dark:text-gray-400">{{item.format.toUpperCase()}} • {{item.size}}px</div>
+                <div class="text-gray-500 dark:text-gray-400">{{item.timestamp | date:'short'}}</div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex gap-1">
+                <button
+                  (click)="downloadFromHistory(item)"
+                  class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-300"
+                  [title]="'download.again' | translate">
+                  📥
+                </button>
+                <button
+                  (click)="removeFromHistory(item.id)"
+                  class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-300"
+                  [title]="'remove.from.history' | translate">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden test canvas -->
+      <canvas #testCanvas class="hidden"></canvas>
+
+      <!-- Toast Notification -->
+      <div
+        *ngIf="showToast"
+        class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
+        {{toastMessage}}
+      </div>
+    </div>
+  </div>
+</div>

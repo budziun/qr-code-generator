@@ -1,0 +1,334 @@
+/* QR Code smooth transitions and animations */
+.qr-updating {
+  opacity: 0.6;
+  transform: scale(0.95);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qr-generated {
+  animation: qr-flash 0.5s ease-out;
+  transform: scale(1.05);
+}
+
+@keyframes qr-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    transform: scale(1);
+  }
+}
+
+/* Enhanced pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* QR Container animations */
+#qrContainer, [data-qr-container] {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#qrContainer:hover, [data-qr-container]:hover {
+  transform: scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Style button enhanced animations */
+.style-button:hover {
+  transform: scale(1.1) rotate(3deg);
+}
+
+.style-button.ring-2 {
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+/* Color change animations */
+.color-input:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Text input animations */
+.text-input:focus {
+  transform: scale(1.01);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+}
+
+/* Enhanced option card animations */
+.option-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.option-card {
+  animation: slideInUp 0.6s ease-out both;
+}
+
+/* Stagger animations */
+.option-card:nth-child(1) { animation-delay: 0.1s; }
+.option-card:nth-child(2) { animation-delay: 0.2s; }
+.option-card:nth-child(3) { animation-delay: 0.3s; }
+.option-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slider animations */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 26px;
+  width: 26px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f97316, #ef4444);
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.5);
+  transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.7);
+}
+
+/* Format button animations */
+.format-button:hover {
+  transform: scale(1.15) rotate(-3deg);
+}
+
+/* Download button enhanced animation */
+.download-button:hover {
+  transform: scale(1.08) translateY(-3px);
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.5);
+}
+
+/* Loading spinner enhancement */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Disabled section styling */
+.disabled-section {
+  position: relative;
+}
+
+.disabled-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(1px);
+  border-radius: 1rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.disabled-section .blur-sm {
+  filter: blur(1px);
+  opacity: 0.6;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.color-input:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+  transform: none !important;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+}
+/* Nowoczesne color inputy bez brzydkich ramek */
+.color-input-modern {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.color-input-modern::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border: none;
+  border-radius: 0.75rem;
+}
+
+.color-input-modern::-webkit-color-swatch {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.color-input-modern::-moz-color-swatch {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Hover effects */
+.color-input-modern:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Focus effects */
+.color-input-modern:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Disabled state */
+.color-input-modern:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Dark mode adjustments */
+.dark .color-input-modern:focus {
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.5);
+}
+
+/* Mobile QR size fix */
+@media (max-width: 480px) {
+  .qr-container,
+  canvas,
+  div[data-qr-container] {
+    max-width: min(300px, calc(100vw - 3rem)) !important;
+    max-height: min(300px, calc(100vw - 3rem)) !important;
+    width: min(var(--qr-size, 300px), calc(100vw - 3rem)) !important;
+    height: min(var(--qr-size, 300px), calc(100vw - 3rem)) !important;
+  }
+
+  /* Adjust grid on mobile */
+  .max-w-6xl.grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Smaller text input on mobile */
+  .max-w-2xl {
+    max-width: 100%;
+  }
+
+  /* Style grid mobile */
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* QR readability indicator */
+.readability-indicator {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scanner drag & drop animations */
+.scanner-drop-zone {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scanner-drop-zone:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+.scanner-drop-zone.drag-over {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.25);
+}
+
+/* Prevent conflicts between drop zones */
+.logo-drop-zone {
+  z-index: 10;
+}
+
+.scanner-drop-zone {
+  z-index: 5;
+}
+
+/* Enhanced visual feedback */
+.drag-over {
+  animation: dragPulse 1s ease-in-out infinite;
+}
+
+@keyframes dragPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
